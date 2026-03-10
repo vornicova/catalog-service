@@ -35,6 +35,8 @@ public interface ProductService {
 
     void delete(Integer id);
 
+    List<ProductResponseDto> getCakesCatalog();
+
     Page<ProductResponseDto> search(String text,
                                     String categoryCode,
                                     DesignCategory designCategory,

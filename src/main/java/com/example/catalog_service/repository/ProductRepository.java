@@ -66,6 +66,13 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             Pageable pageable
     );
 
+    List<Product> findByIsActiveTrueAndCategory_CodeAndDesignCategoryIsNotNull(String categoryCode);
+
+    Page<Product> findByIsActiveTrueAndCategory_CodeAndDesignCategoryIsNotNull(
+            String categoryCode,
+            Pageable pageable
+    );
+
     Optional<Product> findTopByOrderByIdDesc();
 
     @Query("""

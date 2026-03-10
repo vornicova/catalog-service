@@ -226,4 +226,13 @@ public class ProductServiceImpl implements ProductService {
         var contentDto = productMapper.toDtoList(productPage.getContent());
         return new PageImpl<>(contentDto, pageable, productPage.getTotalElements());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> getCakesCatalog() {
+        List<Product> products =
+                productRepository.findByIsActiveTrueAndCategory_CodeAndDesignCategoryIsNotNull("CAKE");
+
+        return productMapper.toDtoList(products);
+    }
 }

@@ -90,4 +90,9 @@ public class ProductController {
     ) {
         return productService.search(q, category, designCategory, minPrice, maxPrice, page, size, sort);
     }
+
+    @GetMapping("/cakes")
+    public List<ProductResponseDto> getCakeCatalog() {
+        return productService.getCakesCatalog();
+    }
 }
