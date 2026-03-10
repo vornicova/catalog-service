@@ -1,5 +1,6 @@
 package com.example.catalog_service.entity;
 
+import com.example.catalog_service.enums.DesignCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,7 @@ public class Product {
 
     @Id
     @Column(name = "id", nullable = false)
-    private Integer id;          // INTEGER, как в БД
+    private Integer id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -31,9 +32,13 @@ public class Product {
     @Column(name = "image_url")
     private String imageUrl;
 
-    // вместо enum-статуса — простое поле is_active из таблицы
     @Column(name = "is_active")
     private Boolean isActive;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "design_category")
+    private DesignCategory designCategory;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)

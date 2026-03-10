@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: catalog_user
       POSTGRES_PASSWORD: catalog_pass
     ports:
-      - "5434:5432"        # снаружи 5434, внутри сети 5432
+      - "5434:5432"
     volumes:
       - catalog_db_data:/var/lib/postgresql/data
 
@@ -17,15 +17,12 @@ services:
     depends_on:
       - catalog-db
     environment:
-      # важно: внутри docker-а каталог видит БД не как localhost, а как catalog-db
       SPRING_DATASOURCE_URL: jdbc:postgresql://catalog-db:5432/catalog_db
       SPRING_DATASOURCE_USERNAME: catalog_user
       SPRING_DATASOURCE_PASSWORD: catalog_pass
       SPRING_JPA_HIBERNATE_DDL_AUTO: none
     ports:
       - "8081:8081"
-    # если надо, можно добавить:
-    # restart: unless-stopped
 
 volumes:
   catalog_db_data:
