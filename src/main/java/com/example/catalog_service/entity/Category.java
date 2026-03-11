@@ -17,17 +17,16 @@ public class Category {
 
     @Id
     @Column(name = "id", nullable = false)
-    private UUID id;              // UUID, как в данных 0000-...
+    private UUID id;
 
     @Column(name = "code", nullable = false, unique = true)
-    private String code;          // CAKES, CUPCAKES, DESSERTS...
+    private String code;
 
     @Column(name = "description")
     private String description;
 
-    // ВАЖНО: поле мапим на колонку name, а не display_name
     @Column(name = "name", nullable = false)
-    private String name;          // "Торты", "Капкейки" и т.п.
+    private String name;
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<Product> products;
