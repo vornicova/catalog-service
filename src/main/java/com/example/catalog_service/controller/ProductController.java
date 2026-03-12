@@ -3,8 +3,6 @@ package com.example.catalog_service.controller;
 import com.example.catalog_service.dto.ProductRequestDto;
 import com.example.catalog_service.dto.ProductResponseDto;
 import com.example.catalog_service.service.ProductService;
-import com.example.catalog_service.enums.DesignCategory;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -21,18 +19,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public List<ProductResponseDto> getAllActive(
-            @RequestParam(name = "category", required = false) String category,
-            @RequestParam(name = "designCategory", required = false) DesignCategory designCategory
-    ) {
-        if (category != null && !category.isBlank() && designCategory != null) {
-            return productService.getByCategoryCodeAndDesignCategory(category, designCategory);
-        }
-
-        if (category != null && !category.isBlank()) {
-            return productService.getByCategoryCode(category);
-        }
-
+    public List<ProductResponseDto> getAllActive() {
         return productService.getAllActive();
     }
 
@@ -63,36 +50,29 @@ public class ProductController {
     public void delete(@PathVariable Integer id) {
         productService.delete(id);
     }
-
     @GetMapping("/page")
     public Page<ProductResponseDto> getPaged(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "12") int size,
             @RequestParam(name = "category", required = false) String category,
-            @RequestParam(name = "designCategory", required = false) DesignCategory designCategory,
             @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
             @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
             @RequestParam(name = "sort", required = false, defaultValue = "id,asc") String sort
     ) {
-        return productService.getPaged(category, designCategory, minPrice, maxPrice, page, size, sort);
+        return productService.getPaged(category, minPrice, maxPrice, page, size, sort);
     }
 
     @GetMapping("/search")
     public Page<ProductResponseDto> search(
             @RequestParam(name = "q") String q,
             @RequestParam(name = "category", required = false) String category,
-            @RequestParam(name = "designCategory", required = false) DesignCategory designCategory,
             @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
             @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "12") int size,
             @RequestParam(name = "sort", defaultValue = "id,asc") String sort
     ) {
-        return productService.search(q, category, designCategory, minPrice, maxPrice, page, size, sort);
+        return productService.search(q, category, minPrice, maxPrice, page, size, sort);
     }
 
-    @GetMapping("/cakes")
-    public List<ProductResponseDto> getCakeCatalog() {
-        return productService.getCakesCatalog();
-    }
 }

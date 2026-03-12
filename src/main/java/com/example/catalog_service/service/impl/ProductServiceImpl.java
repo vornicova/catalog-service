@@ -4,7 +4,6 @@ import com.example.catalog_service.dto.ProductRequestDto;
 import com.example.catalog_service.dto.ProductResponseDto;
 import com.example.catalog_service.entity.Category;
 import com.example.catalog_service.entity.Product;
-import com.example.catalog_service.enums.DesignCategory;
 import com.example.catalog_service.exception.NotFoundException;
 import com.example.catalog_service.mapper.ProductMapper;
 import com.example.catalog_service.repository.CategoryRepository;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -26,11 +24,10 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
-
     private Integer generateNextId() {
         return productRepository.findTopByOrderByIdDesc()
                 .map(p -> p.getId() + 1)
-                .orElse(1);
+                .orElse(1); // если таблица пустая, начнем с 1
     }
 
     @Override
@@ -49,21 +46,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getByCategoryCodeAndDesignCategory(String categoryCode,
-                                                                       DesignCategory designCategory) {
-        return productMapper.toDtoList(
-                productRepository.findByCategory_CodeAndDesignCategoryAndIsActiveTrue(categoryCode, designCategory)
-        );
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public ProductResponseDto getById(Integer id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product not found: " + id));
         return productMapper.toDto(product);
-    }
 
+    }
     @Override
     public void delete(Integer id) {
         if (!productRepository.existsById(id)) {
@@ -74,18 +62,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto create(ProductRequestDto dto) {
+        // находим категорию по коду
         Category category = categoryRepository.findByCode(dto.getCategoryCode())
                 .orElseThrow(() -> new NotFoundException("Category not found: " + dto.getCategoryCode()));
 
         Product product = new Product();
+
+        // так как id у нас INTEGER без автоинкремента — возьмём max(id)+1
         product.setId(generateNextId());
+
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
-        product.setImageUrl(dto.getImageUrl());
         product.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
-        product.setDesignCategory(dto.getDesignCategory());
         product.setCategory(category);
+        // если в dto есть imageUrl — добавь:
+        // product.setImageUrl(dto.getImageUrl());
 
         Product saved = productRepository.save(product);
         return productMapper.toDto(saved);
@@ -105,14 +97,8 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getPrice() != null) {
             product.setPrice(dto.getPrice());
         }
-        if (dto.getImageUrl() != null) {
-            product.setImageUrl(dto.getImageUrl());
-        }
         if (dto.getIsActive() != null) {
             product.setIsActive(dto.getIsActive());
-        }
-        if (dto.getDesignCategory() != null) {
-            product.setDesignCategory(dto.getDesignCategory());
         }
         if (dto.getCategoryCode() != null) {
             Category category = categoryRepository.findByCode(dto.getCategoryCode())
@@ -125,22 +111,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDto updateStatus(Integer id, Boolean isActive) {
-
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Product not found: " + id));
-
-        product.setIsActive(isActive);
-
-        Product saved = productRepository.save(product);
-
-        return productMapper.toDto(saved);
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> getPaged(String categoryCode,
-                                             DesignCategory designCategory,
                                              BigDecimal minPrice,
                                              BigDecimal maxPrice,
                                              int page,
@@ -151,35 +123,22 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(page, size, sortObj);
 
         boolean hasCategory = categoryCode != null && !categoryCode.isBlank();
-        boolean hasDesignCategory = designCategory != null;
         boolean hasPriceRange = minPrice != null && maxPrice != null;
 
         Page<Product> productPage;
 
-        if (hasCategory && hasDesignCategory && hasPriceRange) {
-            productPage = productRepository.findByIsActiveTrueAndCategory_CodeAndDesignCategoryAndPriceBetween(
-                    categoryCode, designCategory, minPrice, maxPrice, pageable
-            );
-        } else if (hasCategory && hasDesignCategory) {
-            productPage = productRepository.findByIsActiveTrueAndCategory_CodeAndDesignCategory(
-                    categoryCode, designCategory, pageable
-            );
-        } else if (hasDesignCategory && hasPriceRange) {
-            productPage = productRepository.findByIsActiveTrueAndDesignCategoryAndPriceBetween(
-                    designCategory, minPrice, maxPrice, pageable
-            );
-        } else if (hasCategory && hasPriceRange) {
-            productPage = productRepository.findByIsActiveTrueAndCategory_CodeAndPriceBetween(
-                    categoryCode, minPrice, maxPrice, pageable
-            );
+        if (hasCategory && hasPriceRange) {
+            productPage = productRepository
+                    .findByIsActiveTrueAndCategory_CodeAndPriceBetween(categoryCode, minPrice, maxPrice, pageable);
         } else if (hasCategory) {
-            productPage = productRepository.findByIsActiveTrueAndCategory_Code(categoryCode, pageable);
-        } else if (hasDesignCategory) {
-            productPage = productRepository.findByIsActiveTrueAndDesignCategory(designCategory, pageable);
+            productPage = productRepository
+                    .findByIsActiveTrueAndCategory_Code(categoryCode, pageable);
         } else if (hasPriceRange) {
-            productPage = productRepository.findByIsActiveTrueAndPriceBetween(minPrice, maxPrice, pageable);
+            productPage = productRepository
+                    .findByIsActiveTrueAndPriceBetween(minPrice, maxPrice, pageable);
         } else {
-            productPage = productRepository.findByIsActiveTrue(pageable);
+            productPage = productRepository
+                    .findByIsActiveTrue(pageable);
         }
 
         var contentDto = productMapper.toDtoList(productPage.getContent());
@@ -195,16 +154,16 @@ public class ProductServiceImpl implements ProductService {
         String property = parts[0];
         String direction = parts.length > 1 ? parts[1] : "asc";
 
-        return "desc".equalsIgnoreCase(direction)
-                ? Sort.by(property).descending()
-                : Sort.by(property).ascending();
+        if ("desc".equalsIgnoreCase(direction)) {
+            return Sort.by(property).descending();
+        } else {
+            return Sort.by(property).ascending();
+        }
     }
-
     @Override
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> search(String text,
                                            String categoryCode,
-                                           DesignCategory designCategory,
                                            BigDecimal minPrice,
                                            BigDecimal maxPrice,
                                            int page,
@@ -217,7 +176,6 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> productPage = productRepository.searchActive(
                 text,
                 categoryCode,
-                designCategory,
                 minPrice,
                 maxPrice,
                 pageable
@@ -227,12 +185,4 @@ public class ProductServiceImpl implements ProductService {
         return new PageImpl<>(contentDto, pageable, productPage.getTotalElements());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<ProductResponseDto> getCakesCatalog() {
-        List<Product> products =
-                productRepository.findByIsActiveTrueAndCategory_CodeAndDesignCategoryIsNotNull("CAKE");
-
-        return productMapper.toDtoList(products);
-    }
 }

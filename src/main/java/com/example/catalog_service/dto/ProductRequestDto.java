@@ -1,6 +1,5 @@
 package com.example.catalog_service.dto;
 
-import com.example.catalog_service.enums.DesignCategory;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -18,5 +17,4 @@ public class ProductRequestDto {
     private Boolean isActive;
     private String categoryCode;
     private String imageUrl;
-    private DesignCategory designCategory;
 }

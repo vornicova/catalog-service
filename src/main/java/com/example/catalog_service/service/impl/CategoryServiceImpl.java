@@ -43,6 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductResponseDto> getProductsByCategoryCode(String code) {
+        // можно или через репозиторий продуктов, или через products из Category
         List<Product> products = productRepository.findByCategory_CodeAndIsActiveTrue(code);
         return productMapper.toDtoList(products);
     }
