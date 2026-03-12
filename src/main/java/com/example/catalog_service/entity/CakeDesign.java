@@ -20,7 +20,7 @@ public class CakeDesign {
     private Integer id;
 
     @Column(name = "code", nullable = false, unique = true)
-    private String code;
+    private Integer code;
 
     @Column(name = "name", nullable = false)
     private String name;

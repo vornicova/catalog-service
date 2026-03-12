@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Builder
 public class CakeDesignResponseDto {
     private Integer id;
-    private String code;
+    private Integer code;
     private String name;
     private String description;
     private String imageUrl;

@@ -14,7 +14,7 @@ public interface CakeDesignRepository extends JpaRepository<CakeDesign, Integer>
 
     List<CakeDesign> findByIsActiveTrueAndDesignCategory(DesignCategory designCategory);
 
-    Optional<CakeDesign> findByCode(String code);
+    Optional<CakeDesign> findByCode(Integer code);
 
-    boolean existsByCode(String code);
+    boolean existsByCode(Integer code);
 }

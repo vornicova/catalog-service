@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 public class CakeDesignRequestDto {
-    private String code;
+    private Integer code;
     private String name;
     private String description;
     private String imageUrl;
