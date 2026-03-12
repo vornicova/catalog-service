@@ -35,15 +35,8 @@ public class Product {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "design_category")
-    private DesignCategory designCategory;
-
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-
-    public void setUpdatedAt(OffsetDateTime now) {
-    }
 }
+

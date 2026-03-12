@@ -4,11 +4,10 @@ import com.example.catalog_service.dto.ProductResponseDto;
 import com.example.catalog_service.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+
+@Mapper(componentModel = "spring")
 public interface ProductMapper {
 
     @Mapping(target = "categoryCode", source = "category.code")
